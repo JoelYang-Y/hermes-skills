@@ -1,0 +1,4 @@
+.DS_Store
+*.lock
+.usage.json
+.usage.json.lock
