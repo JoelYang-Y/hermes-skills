@@ -1,7 +1,7 @@
 ---
 name: att-ops
 description: 用户问 ATT/美国家宽/AnyTLS 出口时使用，管理美国家宽服务器（公网 IP 动态，须先核实）。
-version: 2.0.0
+version: 2.1.0
 author: Hermes Agent
 license: MIT
 platforms: [macos, linux]
@@ -62,6 +62,21 @@ ssh -p 59421 -i ~/.ssh/id_ed25519 root@$ATT_IP "<cmd>"
 - **角色**：ATT 是链式代理的**出口**——客户端不直连它，由搬瓦工侧把 AnyTLS 配成 outbound。
 - 旧机的 `ss-rust`（52937 / Shadowsocks-2022）**已不存在**，别再按 ss-rust 排查。
 - fail2ban **已在运行**（2026-11-10 实测 `systemctl is-active fail2ban` → active，enabled）。配置只存在于 `/etc/fail2ban/jail.d/zz-joel-sshd.local`（**没有** `jail.local`）：`banaction = nftables-multiport`、`backend = systemd`、jail `sshd` port **59421**、maxretry 5 / findtime 10m / bantime 1h；`ignoreip` 含 `64.64.237.34`、`35.148.249.5`。真实封禁表为 `table inet f2b-table`（**按需创建**，无封禁时不存在）。
+
+## 中转链路实测口径（BWG → ATT，2026-11-10 实测）
+
+用户问「这条线怎么中转的 / 能不能套 WireGuard / 为什么 UDP 不通」时，先按这层事实回答，不要临场猜：
+
+| 跳 | 事实 |
+|---|---|
+| 家宽 → BWG `64.64.237.34:443` | TCP 443，TLS 在 **haproxy** 终止；`tcp-request` 读前 32 字节 **AnyTLS auth 前缀**做 ACL 分流 |
+| haproxy → sing-box | `127.0.0.1:8444`，**明文**（inbound 无 tls 块，证明 TLS 已在 haproxy 终结）；同前端另一前缀走 8443 直出 |
+| BWG sing-box → ATT `34443` | 第二段独立 AnyTLS over TLS，自签证书**内嵌 PEM 做 pin**；ATT 侧 `anytls-relay-in` 解流后 `direct`，出口即 ATT 公网 IP |
+
+- **多路复用只发生在 BWG 之后**：实测同一时刻家宽→443 有 265 条会话，haproxy→8444 也是 265（1:1 透传），BWG→ATT 只有 105 条（含 2 条 `min_idle_session` 预建）。压缩来自 sing-box 的 idle session 池（`idle_session_check_interval 30s` / `idle_session_timeout 120s` / `min_idle_session 2`），**Surge 侧每条代理连接都是一个独立 TLS 会话，前端没有复用**。
+- **这条线实际是 TCP-only**：haproxy 443 只 bind TCP，UDP 到不了 ATT。不是配置漏项，是架构决定的；`sing-box check` 对 anytls outbound 加 `network` 字段直接报 `unknown field`，社区 issue 亦记录 anytls outbound 对 UDP 静默丢弃。**别承诺给这条线加 QUIC/游戏 UDP。**
+- **能套 WireGuard，但先问目的**：两端都有 `wireguard.ko` 与 sing-box `with_wireguard`，防火墙 input 均 drop。运维隧道（BWG 服务端 + ATT 主动连出，地址段 `10.66.0.0/24`）零风险；若要替换数据面则需 `ip_forward=1` + nft forward accept + SNAT + MTU 1420 / MSS clamp 1380，属真实系统变更，**须单独授权**。
+- **换证即断链**：ATT 若重装或换自签证书，BWG 配置里内嵌的 PEM 必须同步替换，否则中转直接不通——排查「突然全断且两端都活着」时优先查这条。
 
 ## 常用操作模板
 

@@ -58,6 +58,8 @@ cron 的 `script` 参数必须是 `~/.hermes/profiles/<profile>/scripts/` 下的
 - 归档类 → 逐条检查源文件是否真的出现在目标里，缺一个就退非零；
 - 镜像类 → 连跑两次，第二次必须“无变更且无空提交”（幂等是验收测试）。
 
+**统计口径要先对账，否则会把自己带进假问题**：`find <staging> -name SKILL.md` 会把 **`.archive/` 里的归档技能**一起数进去，而 `sync.sh` 发到仓库时是排除 `.archive/` 的。实测连续四轮的“文件数 − 索引数 = 80”，那个 80 就是归档件数（187 = 107 活跃 + 80 归档），**并不是什么“同一技能存了两份”**。自建包装脚本时把 `.archive/` 也排除，或干脆同时打印“活跃数/归档数/总数”三个数，别只给一个合计数。
+
 ### 8. 时区与命名
 
 cron 表达式按 profile 时区解释；跨时区用户要显式传 `timezone`。profile 改名会让 `deliver: bot-chat` 报 `profile_mismatch`，需改成 `bot-chat:<新profile名>`。

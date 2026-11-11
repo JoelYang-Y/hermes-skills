@@ -2,7 +2,7 @@
 
 Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skills` 同步而来，按分类组织。
 
-- 技能总数：**107**　分类数：**19**
+- 技能总数：**108**　分类数：**19**
 - 每个技能目录：`SKILL.md`（YAML frontmatter `name` / `description`）+ 可选 `references/` `scripts/` `templates/` `assets/`
 - 已排除：`.archive` 归档技能、`.curator_backups` 备份、运行时缓存（`.hub` / `.usage.json` 等）
 - 同步入口：`scripts/sync.sh`（rsync 镜像 + 重建本索引 + 提交推送）
@@ -12,7 +12,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | 分类 | 技能数 | 说明 |
 |---|---|---|
 | [mlops](./mlops/) | 19 | Knowledge and Tools for Machine Learning Operations - tools and frameworks for training, fine-tuning, deploying, and optimizing ML/AI models |
-| [devops](./devops/) | 14 |  |
+| [devops](./devops/) | 15 |  |
 | [creative](./creative/) | 12 | Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools. |
 | [hermes](./hermes/) | 10 |  |
 | [productivity](./productivity/) | 10 | Skills for document creation, presentations, spreadsheets, and other productivity workflows. |
@@ -64,6 +64,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [adguardhome-doh-cert-renewal](./devops/adguardhome-doh-cert-renewal/SKILL.md) | Use when 给 AdGuardHome DoH 证书签发或自动续期。 |
 | [att-ops](./devops/att-ops/SKILL.md) | 用户问 ATT/美国家宽/AnyTLS 出口时使用，管理美国家宽服务器（公网 IP 动态，须先核实）。 |
 | [kanban-orchestrator](./devops/kanban-orchestrator/SKILL.md) | Decomposition playbook + anti-temptation rules for an orchestrator profile routing work through Kanban. The "don't do the work yourself" rule and the basic lifecycle are auto-injected into every kanban worker's system prompt; this skill is the deeper playbook when you're specifically playing the orchestrator role. |
+| [lan-docker-inventory](./devops/lan-docker-inventory/SKILL.md) | Use when 要盘点/发布局域网 Docker 全量清单. 只读采集再脱敏发布. |
 | [linux-icmp-hardening](./devops/linux-icmp-hardening/SKILL.md) | Use when 让自有 Linux 主机不被 ping 探测. 只丢 echo-request. |
 | [nas-docker-ops](./devops/nas-docker-ops/SKILL.md) | 用户问 Z4Pro NAS (10.0.0.3) Docker 容器状态/日志/重启时使用。 |
 | [oracle-cloud-ops](./devops/oracle-cloud-ops/SKILL.md) | 用户问甲骨文云 OCI/oci/oci2 运维、部署或清退自托管服务时使用。 |
