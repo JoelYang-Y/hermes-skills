@@ -1,7 +1,7 @@
 ---
 name: mem0-tiered-tidy-cron
 description: "Use when 做每日 mem0 记忆库分级整理(删碎片/合并). L1-L4+快照回滚."
-version: 1.2.1
+version: 1.2.2
 author: skill-keeper
 license: MIT
 metadata:
@@ -72,6 +72,9 @@ metadata:
 8. **整理期间的自动 flush 会让条数回升**：同轮实测整理后 185 = 182 + 3 条期间新入库碎片。回读校验看的是「自己删掉的 ID 是否真没了」，不是总数单调下降。
 9. **删除顺序是「先并入权威条、再删原条目」**，不能先删再补：2026-11-12 02:00 轮 15 条删除额全部走这条路径（容器/交付物 → 并入 `467ff3f1`、运行时/更新链路 → `e73e8618`、第二处明文 → `df47dc1d` 等），删后 `points_count=117`、15 个 ID 回读均不存在，净减恰好 15（该轮无并发新增）。反过来做，一旦 `mem0_update` 的长正文被截断就是不可逆丢事实。
 10. **边界条目按「属性」保留，不按长度保留**：该轮明确不删的有三类——① 用户偏好（音乐偏好，虽判 L3）；② 无法判定是否本人操作且含账号事实的提醒（某应用专用密码提醒）；③ 用户明示选择的方案（SSH 方案 A）。简报要逐条点名，否则下一轮会被当成 L3/L4 重判。
+
+11. **整理轮开始前先自检记忆后端，缺依赖就地补装**：2026-11-12 22:15 运行时 venv 被重建（`~/.hermes/installs/<id>/environments/<env>/venv`），23:00 那轮 `mem0_search` 直接报 `No module named 'sentence_transformers'`，而 Qdrant `points_count=85`、`status:green`、`mem0ai 2.2.1` 可导入——故障既不在库也不在 mem0 版本（`@session:memory-keeper/local-e4a9c8a2b19c02913f34d01b8c850911b2a9ed2d499640749032914f93bb1ea0`，第二手实测，未自行复现）。一条命令补齐五件套后五个 import 全 OK：`uv pip install --python <live venv>/bin/python "sentence-transformers>=5.0.0" fastembed onnxruntime spacy`（实测落到 sentence-transformers 6.3.0 / torch 2.15.0 / onnxruntime 1.31.1），spacy 形态另需 `en_core_web_sm` 3.8.0 wheel。**重建不限 06:00**，别假设「不到 06:00 环境就是好的」；补装完仍需在下一会话才恢复插件实例，当轮写入走 SDK（`infer=False`）。
+12. **查重不要靠 `mem0_search` 的 top-k**：该库（mem0ai 2.2.1 + hybrid）得分仅 0.27–0.44、排序很弱——`NAS 备份` 先召回 TCL 电视那条，刚写入的点用近逐字 query 也召不回；已用另一个健康的 sibling venv 复测得到同样分数，故属既有特性而非装坏。判重一律以全量 scroll/dump 后按关键词 grep 为准，别因为 top-k 里没看见就当成新事实再写一条。
 
 ## 安全边界与失败停止
 

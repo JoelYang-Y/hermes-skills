@@ -2,7 +2,7 @@
 
 Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skills` 同步而来，按分类组织。
 
-- 技能总数：**108**　分类数：**19**
+- 技能总数：**109**　分类数：**19**
 - 每个技能目录：`SKILL.md`（YAML frontmatter `name` / `description`）+ 可选 `references/` `scripts/` `templates/` `assets/`
 - 已排除：`.archive` 归档技能、`.curator_backups` 备份、运行时缓存（`.hub` / `.usage.json` 等）
 - 同步入口：`scripts/sync.sh`（rsync 镜像 + 重建本索引 + 提交推送）
@@ -12,7 +12,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | 分类 | 技能数 | 说明 |
 |---|---|---|
 | [mlops](./mlops/) | 19 | Knowledge and Tools for Machine Learning Operations - tools and frameworks for training, fine-tuning, deploying, and optimizing ML/AI models |
-| [devops](./devops/) | 15 |  |
+| [devops](./devops/) | 16 |  |
 | [creative](./creative/) | 12 | Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools. |
 | [hermes](./hermes/) | 10 |  |
 | [productivity](./productivity/) | 10 | Skills for document creation, presentations, spreadsheets, and other productivity workflows. |
@@ -63,6 +63,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 |---|---|
 | [adguardhome-doh-cert-renewal](./devops/adguardhome-doh-cert-renewal/SKILL.md) | Use when 给 AdGuardHome DoH 证书签发或自动续期。 |
 | [att-ops](./devops/att-ops/SKILL.md) | 用户问 ATT/美国家宽/AnyTLS 出口时使用，管理美国家宽服务器（公网 IP 动态，须先核实）。 |
+| [docker-management](./devops/docker-management/SKILL.md) | Manage Docker containers, images, volumes, and Compose. |
 | [kanban-orchestrator](./devops/kanban-orchestrator/SKILL.md) | Decomposition playbook + anti-temptation rules for an orchestrator profile routing work through Kanban. The "don't do the work yourself" rule and the basic lifecycle are auto-injected into every kanban worker's system prompt; this skill is the deeper playbook when you're specifically playing the orchestrator role. |
 | [lan-docker-inventory](./devops/lan-docker-inventory/SKILL.md) | Use when 要盘点/发布局域网 Docker 全量清单. 只读采集再脱敏发布. |
 | [linux-icmp-hardening](./devops/linux-icmp-hardening/SKILL.md) | Use when 让自有 Linux 主机不被 ping 探测. 只丢 echo-request. |
@@ -72,9 +73,9 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [pve-ops](./devops/pve-ops/SKILL.md) | 用户问 PVE 物理机 (10.0.0.4)/LXC/虚拟机/企业源/体检优化时使用。 |
 | [server-readonly-inspection](./devops/server-readonly-inspection/SKILL.md) | 对已确认的三台自有服务器做固定只读健康巡检时使用；只通过白名单脚本，不接受任意命令，不执行修复。 |
 | [site-egress-check](./devops/site-egress-check/SKILL.md) | 查网站出口IP/走哪个节点时用 Surge API 脚本（paypal.com 出口检测）。 |
-| [ssh-fail2ban-hardening](./devops/ssh-fail2ban-hardening/SKILL.md) | 为机队任意主机部署或维护 fail2ban SSH 防爆破时使用（ignoreip 白名单需跨主机同步）。 |
 | [surge-config-operations](./devops/surge-config-operations/SKILL.md) | 用户问 Surge UDP/QUIC/MASQUE 节点配置或 SubStore 批量参数时使用。 |
 | [vps-ops](./devops/vps-ops/SKILL.md) | 用户问搬瓦工 VPS/节点/AnyTLS/s-ui/1Panel 时使用，密码方式管理 VPS。 |
+| [watchers](./devops/watchers/SKILL.md) | Poll RSS, JSON APIs, and GitHub with watermark dedup. |
 | [webhook-subscriptions](./devops/webhook-subscriptions/SKILL.md) | Webhook subscriptions: event-driven agent runs. |
 
 ## creative

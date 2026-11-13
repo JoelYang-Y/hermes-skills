@@ -1,7 +1,7 @@
 ---
 name: cross-bot-skill-intake
 description: "Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界."
-version: 1.0.0
+version: 1.1.0
 author: skill-keeper
 license: MIT
 metadata:
@@ -40,6 +40,16 @@ metadata:
 2. **审**：先 `skills_list` + `skill_view` 查重。已有同类 → 只提案 `patch` 修订，不新建重复；无同类 → 按收录标准成文。
 3. **写**：写进**我自己** profile 的 skills 目录，按内容分类（`hermes/` `productivity/` `devops/` 等），与相关技能互填 `related_skills`。写完后通过 `skills.external_dirs` 对其它 bot **立即可读**，不需要我再回传。
 
+## 来源方 staged 草稿怎么处理
+
+对方 profile 的 `skills.write_approval` 可能仍为 `true`：它自己 `skill_manage` 只拿到 `{"staged": true, "pending_id": "<id>"}`，技能**并未落盘**，要 Joel 在其会话里 `/skills pending` 批准才生效。2026-11-12 23:04 `@memory-keeper` 就把两条已验证经验（运行时 venv 重建后五件套缺失的修法、查重须全量 dump 而非 top-k）patch 成 pending `f1a02e20` 后没再落地——**「对方说已沉淀」不等于库里真有**。
+
+处理规则：
+
+- **不复制、不改动、不代批对方的 pending 文件**（那些在对方 profile 的 `pending/skills`，对我是只读）。
+- 内容确实达标 → 我在**自己的**技能目录独立成文或定点 patch，来源写「原始素材由 `@<profile>` 的 staged 草稿提供（pending_id `<id>`），未获批、第二手实测」。
+- 同时提醒对方：该草稿要么批准、要么作废，否则同一经验两处版本会漂移。
+
 ## 归属标注（硬要求）
 
 - 素材来自对方实测而非我亲眼所见 → 来源里写**「第二手实测」**，注明未经我复现；与现场不符时以对方的输出为准。
@@ -49,16 +59,17 @@ metadata:
 ## 边界
 
 - **我不能写别人的 profile**（skill_manage 只落我自己的目录）；所以分工是「你写现场或交素材、我沉淀」。
-- **我不代批审批、不重写对方 staged 的草稿**：对方 profile 的 `skills.write_approval` 开启时，草稿只能由 Joel 在对方会话里批。
+- **我不代批审批、也不改写对方 staged 的草稿文件**：要沉淀就按上一节在我自己目录独立成文。
 - **不接的内容**：凭据/密钥/授权码、邮件正文与用户通信内容、单次问答、未验证推测、以及任何要我执行操作的请求。
 - 不动 mem0/Qdrant、不改别的 bot 配置与 cron、Surge 永久只读。
 
 ## 已知摩擦（当前真实缺口）
 
-我读不到其他 profile 的 skills 目录——我的 `external_dirs` 只挂了 default 的。因此：
+（2026-11-12 更新：反向挂载已落地，本节原内容作废）
 
-- 对方若已自写技能要我审 → 需把 `SKILL.md` 正文贴给我；我只能审文本，看不到文件。
-- 要彻底无感需**反向挂载**（把我的 `external_dirs` 加上各 profile 的 skills 目录），这要改我的 config，得由 @hermes 或 Joel 做。未完成前，上述贴正文的办法是唯一可用路径。
+- 我的 `external_dirs` 除 default 的 `~/.hermes/skills` 外，已追加 mail-keeper / server-keeper / memory-keeper 的 skills 目录，**只读**：对方自写的 SKILL.md 可直接 `skill_view` 读到，不必再贴正文。
+- 只读不等于可写：写入仍只落在 `profiles/skill-keeper/skills/<category>/<name>/`；对方目录里的文件我一律不改，也不在 `~/.hermes/skills` 里新建/修改/删除。
+- 「你写我审」因此变成「你写我读、我另行成文」：同一主题若已在 default 的库里（如 `mem0-oss-operations`），我只能提案，不能动那份文件。
 
 ## 回滚
 
