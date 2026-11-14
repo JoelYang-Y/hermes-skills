@@ -1,7 +1,7 @@
 ---
 name: mem0-tiered-tidy-cron
 description: "Use when 做每日 mem0 记忆库分级整理(删碎片/合并). L1-L4+快照回滚."
-version: 1.2.2
+version: 1.2.3
 author: skill-keeper
 license: MIT
 metadata:
@@ -75,6 +75,8 @@ metadata:
 
 11. **整理轮开始前先自检记忆后端，缺依赖就地补装**：2026-11-12 22:15 运行时 venv 被重建（`~/.hermes/installs/<id>/environments/<env>/venv`），23:00 那轮 `mem0_search` 直接报 `No module named 'sentence_transformers'`，而 Qdrant `points_count=85`、`status:green`、`mem0ai 2.2.1` 可导入——故障既不在库也不在 mem0 版本（`@session:memory-keeper/local-e4a9c8a2b19c02913f34d01b8c850911b2a9ed2d499640749032914f93bb1ea0`，第二手实测，未自行复现）。一条命令补齐五件套后五个 import 全 OK：`uv pip install --python <live venv>/bin/python "sentence-transformers>=5.0.0" fastembed onnxruntime spacy`（实测落到 sentence-transformers 6.3.0 / torch 2.15.0 / onnxruntime 1.31.1），spacy 形态另需 `en_core_web_sm` 3.8.0 wheel。**重建不限 06:00**，别假设「不到 06:00 环境就是好的」；补装完仍需在下一会话才恢复插件实例，当轮写入走 SDK（`infer=False`）。
 12. **查重不要靠 `mem0_search` 的 top-k**：该库（mem0ai 2.2.1 + hybrid）得分仅 0.27–0.44、排序很弱——`NAS 备份` 先召回 TCL 电视那条，刚写入的点用近逐字 query 也召不回；已用另一个健康的 sibling venv 复测得到同样分数，故属既有特性而非装坏。判重一律以全量 scroll/dump 后按关键词 grep 为准，别因为 top-k 里没看见就当成新事实再写一条。
+13. **每轮简报不要新建记忆，只刷新「整轮运行日志」权威条**：整理轮自己写的「XX:XX 轮实测结果」碎片，下一轮必然要花配额删掉它——2026-11-14 02:00 轮删的 8 条里有 4 条（`c81b8433`/`3680fc3e`/`19190099`/`ea1fd88d`）正是 18:15 与 00:16 两轮自己写的日志碎片。正确做法：`mem0_update` 原地刷新那条唯一日志条（保持原 ID、不 delete+add），内容追加「本轮起点条数/字符 → 整理后实测条数/字符/占比、合并组、删除理由、快照文件名」。库膨胀的根因本就是 cron 简报自动回写，整理轮不该再制造同类碎片。
+14. **收尾用 Qdrant 直读复算，不用 mem0 口径**：`POST /collections/<c>/points/count`（filter `user_id`）拿条数，再全量 `scroll`（`limit:200` 翻页）累加 `payload.data` 长度得字符数，两个数字与简报一致才算完成。2026-11-14 02:00 轮实测 111/48,389（60.5%）→ 103/47,379（59.2%），与 mem0 侧读数一致；同时按关键字 grep 确认合并后的权威条（巡检/内存跟踪/安全事件/日志）都恰好在 1 条——合并验证比总数更可靠。
 
 ## 安全边界与失败停止
 
@@ -95,5 +97,6 @@ metadata:
 - 2026-11-09 02:00 轮 `@session:memory-keeper/local-1d3fa0db56de7ca01d676809d38146d7cb41e1b41c838a0402d911bffc0448d8`（该轮简报声称 319 条/83,992 → 307 条/80,314，**此数字 2026-11-09 被 memory-keeper 的独立扫描证伪：实测 183 条 / 60,994 字符（76.2%）**，差距 124 条 / 19.3k 字符；引用前必须自行复测）。
 - 2026-11-10 02:00 轮 `@session:memory-keeper/local-b153d613f2449b0df09646fdd76f85129e173a63f6058cb919d9fd83942ccb68`（实测 197 条 / 62,822 → 185 条 / 59,706，合并 3 组、删 15 条、中文化 0；**第二手实测**：工具输出由我在该会话中读取，未亲自复现）。该轮新增两条坑：`python3 -c` 在 cron 被判 dangerous 而 BLOCKED（错误文本点名 `approvals.cron_mode: approve`），改用 `jq` 与预置脚本绕过；快照 JSON 字段为 `{id,len,level,age_days,data}` 且 `data` 是纯字符串，`.data|keys` 会报 `string has no keys`，取值只能 `.data`。
 - 2026-11-12 02:00 轮 `@session:memory-keeper/local-52f761a8db0e378d47dfce2b1860f25fe8bf794fd62f740ca8e4c7a54f3577ad`（132 条 / 59,512 字符 74.4% → 117 条 / 47,822 字符 59.8%；删 15 条全部先并入权威条、中文化 0、另多轮压缩 9 条 L1 大条目；Qdrant `points_count=117` 与回读一致。**第二手实测**：工具输出由我在该会话中读取，未亲自复现；该轮只落脚本快照，未另存独立备份）。
+- 2026-11-14 02:00 轮 `@session:memory-keeper/local-67332c99434081e065eb3c12cbd5563b4b32e4eec99fae5610db4acd8f00c9ab`（111 条 / 48,389 字符 60.5% → 103 条 / 47,379 字符 59.2%；合并 3 组（巡检两轮、bwg 内存两轮、Meta 事件 3 条）、删 8 条、中文化 0，快照 `tidy-backup-20261114-020039.json`；Qdrant 直读 count 103 与 scroll 累加 47,379 双重回读一致。本轮新增坑 13/14：删掉的 8 条里 4 条是前两轮自己写的日志碎片。**第二手实测**：工具输出由我在该会话中读取，未自行复现）。
 - 事实：分级口径、上限、快照路径、校验命令与错误文本均来自上述真实工具输出。
 - 推断/待验证：快照是否含向量、回滚演练未做；扫描脚本 166 行为当时读到的版本，后续可能再改。
