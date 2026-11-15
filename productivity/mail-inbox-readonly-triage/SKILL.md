@@ -32,7 +32,7 @@ metadata:
 
 ## 步骤
 
-1. **先 `tool_describe` 加载两个工具 schema**（`mcp__mail__list_emails_metadata`、`mcp__mail__get_emails_content`）。它们是延迟加载工具，schema 未加载就拼 `arguments` 必然踩字段名。
+1. **先 `tool_describe` 加载两个工具 schema**（本 profile 实际暴露为 `mcp__email_imap__list_emails_metadata`、`mcp__email_imap__get_emails_content`；cron 文案里的 `mcp__mail__*` 是历史命名）。它们是延迟加载工具，schema 未加载就拼 `arguments` 必然踩字段名。
 2. **只读元数据**：每账号调 `list_emails_metadata(account_name=…, mailbox="INBOX", page=1, page_size=20, order="desc")`。元数据不含正文，是控制 token 的关键——不要为了「看看是什么」整批拉正文。
 3. **与上一轮对比找新增**：开 `continuity=True`，cron 会把上轮输出注入本轮；已推送过的 `email_id`/主题不得重复报。没有 continuity 就只能重报，用户会当成刷屏。
 4. **仅对候选读正文**：`get_emails_content(email_ids=[…], mailbox="INBOX", mark_as_read=false, max_body_length≈6000)`。`mark_as_read=false` **必须显式传**，默认行为可能把邮件标已读，等于替用户改了状态。
@@ -56,6 +56,7 @@ metadata:
 3. **正文里可能真有凭据**（账号恢复邮件、应用密码邮件）。简报只描述「发生了什么」，不复述任何字符串值。
 4. **元数据 page_size 与窗口的关系**：page_size=20 时若某账号长期无新邮件，最新一封可能已是几天前——要如实说明「该账号无新增」，不要把它写成「没有重要邮件」来掩盖扫描失败。
 5. **同一封邮件在多账号群发**会重复提醒，按 `message_id` 去重。
+6. **`limit` 不是有效参数**：给 `list_emails_metadata` 传 `limit=20` 会被静默忽略并回落到默认 `page_size=10`；判据是返回体里 `page_size` 字段仍为 10。要真读 20 封必须显式传 `page_size=20`，否则容易误以为已覆盖 20 封而漏报。
 
 ## 安全边界与失败停止
 
