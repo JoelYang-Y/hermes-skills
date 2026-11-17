@@ -2,7 +2,7 @@
 
 Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skills` 同步而来，按分类组织。
 
-- 技能总数：**110**　分类数：**19**
+- 技能总数：**111**　分类数：**19**
 - 每个技能目录：`SKILL.md`（YAML frontmatter `name` / `description`）+ 可选 `references/` `scripts/` `templates/` `assets/`
 - 已排除：`.archive` 归档技能、`.curator_backups` 备份、运行时缓存（`.hub` / `.usage.json` 等）
 - 同步入口：`scripts/sync.sh`（rsync 镜像 + 重建本索引 + 提交推送）
@@ -14,7 +14,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [mlops](./mlops/) | 19 | Knowledge and Tools for Machine Learning Operations - tools and frameworks for training, fine-tuning, deploying, and optimizing ML/AI models |
 | [devops](./devops/) | 16 |  |
 | [creative](./creative/) | 12 | Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools. |
-| [hermes](./hermes/) | 11 |  |
+| [hermes](./hermes/) | 12 |  |
 | [productivity](./productivity/) | 10 | Skills for document creation, presentations, spreadsheets, and other productivity workflows. |
 | [software-development](./software-development/) | 8 |  |
 | [research](./research/) | 6 | Skills for academic research, paper discovery, literature review, domain reconnaissance, market data, content monitoring, and scientific knowledge retrieval. |
@@ -105,6 +105,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [cron-delivery-verification](./hermes/cron-delivery-verification/SKILL.md) | Use when 建/验收 cron 投递与脚本任务. 不信字段, 显式地址. |
 | [cross-bot-skill-intake](./hermes/cross-bot-skill-intake/SKILL.md) | Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界. |
 | [hermes-daily-status-cron](./hermes/hermes-daily-status-cron/SKILL.md) | 模式——给 Hermes 配置一个每天固定时间、纯 shell采集的健康日报 cron job，推送到 Telegram 等渠道。零 LLM 开销、脚本 stdout 直接投递。 |
+| [hermes-model-identity-audit](./hermes/hermes-model-identity-audit/SKILL.md) | Use when 回答当前模型身份/版本. 三层核对, 不信自述. |
 | [hermes-operations](./hermes/hermes-operations/SKILL.md) | Hermes Agent platform operations and maintenance — gateway management, full-stack restart (macOS launchd / Linux systemd / s6), auto-update fixes, memory indexing, mem0 platform quirks (event_id vs memory_id, stale injected snapshots), MEMORY+USER injection, and platform troubleshooting. Covers SSH/HTTPS git remotes, PID file race conditions, gateway restart, and QMD supplementary memory setup. |
 | [hermes-system-optimization](./hermes/hermes-system-optimization/SKILL.md) | 用于 Hermes 全系统深度体检、Mem0 记忆精简及服务链路打通。 |
 | [mem0-full-export](./hermes/mem0-full-export/SKILL.md) | Use when 导出 Hermes 全部记忆. Qdrant 只读 scroll 三格式. |
