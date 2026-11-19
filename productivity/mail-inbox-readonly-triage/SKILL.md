@@ -60,8 +60,9 @@ metadata:
 5. **同一封邮件在多账号群发**会重复提醒，按 `message_id` 去重。
 6. **`limit` 不是有效参数**：给 `list_emails_metadata` 传 `limit=20` 会被静默忽略并回落到默认 `page_size=10`；判据是返回体里 `page_size` 字段仍为 10。要真读 20 封必须显式传 `page_size=20`，否则容易误以为已覆盖 20 封而漏报。
 7. **静默轮没有「已推送ID」清单**：按规则静默输出只能是 8 字符，所以 continuity 注入上一轮 [SILENT] 时拿不到去重清单。恢复办法：`session_search(query="已推送ID", sort="newest")` 取最近一次非静默报告的清单；再用两个账号 INBOX 顶部 `email_id` 与最近一轮 cron 会话做比对——顶部相同即「无新增」，无需为核对而逐封读正文。
-8. **带附件的邮件读正文后可能被置为已读（两个样本：3113 被置读，3110/3109 未变）**：2026-11-16 巡检中，同一 `get_emails_content(mark_as_read=false)` 调用读了 4 封，3 封无附件邮件保持未读，唯独带 PDF 附件的 Google Fi 月度对账单（3113）事后在 `seen=true` 查询里出现。怀疑工具为取附件元数据走了非 PEEK 的整封抓取。规程：对带附件邮件读前先记 `email_id`，读后再用 `seen=false`+`subject` 定向查询复核；若确被置读，如实说明是工具副作用，不要谎称「未改已读」。**复核顺序很重要**：读前先记 `seen=false` 快照，读后再比对；否则会把历史轮次遗留的已读状态误判成本轮副作用（3113 就复现过这种误判）。
+8. **`mark_as_read=false` 不是硬保证：读正文可能把邮件置为已读，与有无附件关系不稳定**。实测样本：Gmail 8099039 无附件的 iFAST 3122（2026-11-19 巡检）读后从未读集合消失；QQ 1696700563 的 Steam 3210/3211 同样被置读；也有保持未读的（Gmail 3132、3110/3109）。规程：① 读前先用 `seen=false` 留未读快照并记下 `email_id`；② 读后用 `from_address=<发件人> + seen=false` 定向复核（**不要用 `subject=`，见坑 10**）；③ 若确被置读，如实说明是工具副作用，不要谎称「未改已读」；④ 禁止用 mark/set_flags 自行回滚。
 9. **上一轮报告已生成但投递中断时，不能只靠「已推送ID」去重**：若上一轮把某封写进清单，但 cron 投递失败（投递目标只收到「Cron failed: interrupted」而无报告正文），严格按清单去重会让这封从未送达的邮件被永久压掉。判据：在投递目标会话按时间点检索，只有失败通知、没有 `[Cron delivery: …]` 正文，即视为未送达；此时允许补投一次并在正文注明「上一轮投递中断，本轮补投」，清单保持不变。
+10. **`subject` 过滤在 Gmail 8099039 上实测不生效**：用完整主题（`Update on AUD Multi-Currency Current Account & Fixed Term Deposits`）查询返回 `total: 0`，同一封用 `from_address=noreply@ifastgb.com` 却能返回。复核已读状态或定位单封时改用 `from_address`（可叠加 `seen`/`since`），否则会把「查不到」误判成「邮件不存在」或「已被移走」。同理，`seen=false` 的有效性也要先用已知未读邮件验证再用。
 
 ## 安全边界与失败停止
 
