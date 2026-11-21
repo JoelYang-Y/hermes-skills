@@ -1,7 +1,7 @@
 ---
 name: session-digest-memory-cron
 description: "Use when 建/改每日会话→mem0 记忆提取 cron. 只读素材+查重写入."
-version: 1.1.0
+version: 1.1.1
 author: skill-keeper
 license: MIT
 metadata:
@@ -117,6 +117,7 @@ curl -s -X POST "http://<nas-host>:6333/collections/<collection>/points/count" \
 4. **素材里可能有明文凭据**。用户会在聊天里贴密码/隧道命令，脚本按原样归档即等于把秘密落盘。因此：目录 700、文件 600；**禁止把 digest 原文投递到任何渠道**，只投简报；prompt 里再显式禁止入库。
 5. **26h 窗口必然重叠**：重叠部分靠「先查重后写入」兜底，不要改成精确 24h（会丢跨零点会话）。
 6. **容量红线**：记忆库参考上限 **80,000 字符**，80%（约 **64,000 字符**）为合并触发线 —— 2026-11-08 用户授权扩容，原 40,000 / 32,000 口径已作废。**不要再按旧值判断越线**：曾据此把当时的 101 条 / 44,309 字符误报成越线并触发不必要的合并提议。提取任务只增不删，一旦简报报出越线（>64,000），另行安排合并，不要在本管道里顺手删。
+7. **`messages.timestamp` 是 epoch 秒浮点，文本时间比较会静默返回 0 行**：2026-11-21 03:01 提取轮用 `where m.timestamp>=? and m.timestamp<?` 绑定 `"2026-11-21 01:55:00"` / `"2026-11-21 03:05:00"`，五个 profile（含 default 根库）全部返回空集，表面看是「窗口内没有消息」；实际该字段是数值 epoch（当时最新一条 `1795199553.77…`）。把窗口按 CST(+08:00) 换算成 epoch 再查，立即得到 mail-keeper cron 17 assistant + 21 tool + 2 user、memory-keeper 32 + 60 + 3 等真实行数。规则：查询前先 `select timestamp from messages order by id desc limit 1` 确认字段类型；脚本里用 `datetime.strptime(s,'%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone(timedelta(hours=8))).timestamp()` 生成边界；出现「0 行」先用一条已知存在的消息反查验证，别把 0 行直接写成「无新增」。
 
 ## 安全边界与失败停止
 
@@ -134,5 +135,6 @@ curl -s -X POST "http://<nas-host>:6333/collections/<collection>/points/count" \
 - 2026-11-08 会话 `@session:default/local-74e97fc24909abb681ce42622e3a8e1e29a4e1ef2c14994803a0e2fd06427480`（创建脚本 + 建 job `1c1d9477760f` + 首次 run 实测 ok）。
 - 2026-11-08 会话 `@session:memory-keeper/local-6e1e4ae23ee86e277aa739c713ec21212685c7957e82bcc2bc4e2750980826f7`（坑 2、坑 3 实测复现；本轮写入 2 条并回读核对）。
 - 2026-11-08 反例修正（坑 1）：`@session:memory-keeper/local-0f32b3d15756639c4c7d610fd17b308245df61892bdce3c782e8efa1843a359b` 与 `@session:memory-keeper/local-e11f4669d9f2b3a10c07e0ebc74c077dc1801a40a3a6cb1ec3cb53f75981b4bc`——`enabled_toolsets=["memory","terminal"]` 下 mem0 工具正常，证明「传 enabled_toolsets 必砍 mem0」的旧结论过宽。
+- 2026-11-21 03:01 增量提取轮 `@session:memory-keeper/local-6dce3e54bfaf7474141fd79345416628b02197555b8c520c865e1cad1e8b1f1f`（窗口内非 cron 消息 0 条、写入 0 条、输出 `[SILENT]`；本轮暴露「timestamp 文本比较返回 0 行」的假空窗，修正后逐 profile 得到真实行数。新增坑 7。**第二手实测**：工具输出由我在该会话中读取，未自行复现）。
 - 事实：脚本参数、cron 参数、run 结果、Qdrant 计数均来自上述真实工具输出。
 - 推断/待验证：memory-keeper 侧脚本后续加了水位线与补查（据 mem0 记录，未核源码）；其简报称可跨 4 个 profile 聚合，机制未亲自验证。

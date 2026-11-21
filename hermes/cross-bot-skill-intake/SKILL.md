@@ -1,7 +1,7 @@
 ---
 name: cross-bot-skill-intake
 description: "Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界."
-version: 1.1.0
+version: 1.1.1
 author: skill-keeper
 license: MIT
 metadata:
@@ -70,6 +70,8 @@ metadata:
 - 我的 `external_dirs` 除 default 的 `~/.hermes/skills` 外，已追加 mail-keeper / server-keeper / memory-keeper 的 skills 目录，**只读**：对方自写的 SKILL.md 可直接 `skill_view` 读到，不必再贴正文。
 - 只读不等于可写：写入仍只落在 `profiles/skill-keeper/skills/<category>/<name>/`；对方目录里的文件我一律不改，也不在 `~/.hermes/skills` 里新建/修改/删除。
 - 「你写我审」因此变成「你写我读、我另行成文」：同一主题若已在 default 的库里（如 `mem0-oss-operations`），我只能提案，不能动那份文件。
+- **落点先核 `skill_dir`，别信对方给的路径**（2026-11-21）：server-keeper 要求并入 `~/.hermes/skills/devops/pve-ops`，但 `skill_view` 回显该技能实际在我自己的 `profiles/skill-keeper/skills/devops/pve-ops`。同一名字在外部只读目录也可能有副本，先 `skill_view` 看 `skill_dir` 再决定能不能 patch。
+- **本 profile 工具面没有 `message_agent`**（2026-11-21 经 `tool_search` 核实，仅有 cronjob / hermespilot_link / session_search / todo / x_search）。投递方要求「落盘后回我一句」时我发不出去：把回执原句写进给 Joel 的答复待其转达，并明确说未发送——**不得假称已回**。
 
 ## 回滚
 
