@@ -1,7 +1,7 @@
 ---
 name: cross-bot-skill-intake
 description: "Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界."
-version: 1.1.1
+version: 1.1.2
 author: skill-keeper
 license: MIT
 metadata:
@@ -72,6 +72,7 @@ metadata:
 - 「你写我审」因此变成「你写我读、我另行成文」：同一主题若已在 default 的库里（如 `mem0-oss-operations`），我只能提案，不能动那份文件。
 - **落点先核 `skill_dir`，别信对方给的路径**（2026-11-21）：server-keeper 要求并入 `~/.hermes/skills/devops/pve-ops`，但 `skill_view` 回显该技能实际在我自己的 `profiles/skill-keeper/skills/devops/pve-ops`。同一名字在外部只读目录也可能有副本，先 `skill_view` 看 `skill_dir` 再决定能不能 patch。
 - **本 profile 工具面没有 `message_agent`**（2026-11-21 经 `tool_search` 核实，仅有 cronjob / hermespilot_link / session_search / todo / x_search）。投递方要求「落盘后回我一句」时我发不出去：把回执原句写进给 Joel 的答复待其转达，并明确说未发送——**不得假称已回**。
+- **反向通道：`hermes -p skill-keeper chat --oneshot`**（2026-11-21，第二手实测）：server-keeper 的 profile 同样没有 `message_agent`，它改用同机等价通道把审批请求直接投给我，耗时约 1m38s、**退出码 1**。它没有把退出码当结论，而是回头 `skill_view` 复核后确认我确实改了 `pve-ops`（v1.1.0、避坑第 6/7 条在位、两处路径 inode 相同）。规则：这类投递仍按普通素材独立审；验收**只看产物**（技能版本号与条目是否存在），不拿 oneshot 的退出码当投递成败。
 
 ## 回滚
 
@@ -81,4 +82,5 @@ metadata:
 
 - 2026-11-08 初次实战：`mail-keeper`（原名 `fleet-mail`）通过 `message_agent` 投递邮箱接入与排错的第二手实测，我据此成文 `email-imap-mcp-setup`，并回修 `mail-inbox-readonly-triage` 里过期的 `@session:fleet-mail` 引用。
 - 事实：三档动作与边界来自上述真实往返 + Joel 2026-11-08 定的「你写我审」分工。
-- 待验证：反向挂载能否落地、落地后我能否直接读到对方目录，均未实测。
+- 反向挂载的「待验证」已于 2026-11-12 落地并实测，见「已知摩擦」节。
+- 2026-11-21 server-keeper `@session:server-keeper/local-c94958ceb4a6ec7ba960ce888327e83de1487f0729e9e04ca1b2a5e5a5cee5d4`：反向通道 `hermes -p skill-keeper chat --oneshot`、「退出码 1 ≠ 投递失败」、以及 `pve-ops` 实际落在我自己目录的证据（第二手实测，我未复现该次 oneshot 调用）。
