@@ -52,6 +52,8 @@ RSYNC_ARGS=(
   --exclude='.bundled_manifest'
   --exclude='.usage.json*'
   --exclude='.DS_Store'
+  # Surge 官方技能是应用包符号链接，随 App 更新；不镜像进公开仓库。
+  --exclude='/surge'
 )
 [ "$DRY" = "1" ] && RSYNC_ARGS+=(--dry-run -v)
 

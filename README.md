@@ -2,7 +2,7 @@
 
 Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skills` 同步而来，按分类组织。
 
-- 技能总数：**111**　分类数：**19**
+- 技能总数：**112**　分类数：**19**
 - 每个技能目录：`SKILL.md`（YAML frontmatter `name` / `description`）+ 可选 `references/` `scripts/` `templates/` `assets/`
 - 已排除：`.archive` 归档技能、`.curator_backups` 备份、运行时缓存（`.hub` / `.usage.json` 等）
 - 同步入口：`scripts/sync.sh`（rsync 镜像 + 重建本索引 + 提交推送）
@@ -12,7 +12,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | 分类 | 技能数 | 说明 |
 |---|---|---|
 | [mlops](./mlops/) | 19 | Knowledge and Tools for Machine Learning Operations - tools and frameworks for training, fine-tuning, deploying, and optimizing ML/AI models |
-| [devops](./devops/) | 16 |  |
+| [devops](./devops/) | 17 |  |
 | [creative](./creative/) | 12 | Creative content generation — ASCII art, hand-drawn style diagrams, and visual design tools. |
 | [hermes](./hermes/) | 12 |  |
 | [productivity](./productivity/) | 10 | Skills for document creation, presentations, spreadsheets, and other productivity workflows. |
@@ -67,6 +67,7 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [kanban-orchestrator](./devops/kanban-orchestrator/SKILL.md) | Decomposition playbook + anti-temptation rules for an orchestrator profile routing work through Kanban. The "don't do the work yourself" rule and the basic lifecycle are auto-injected into every kanban worker's system prompt; this skill is the deeper playbook when you're specifically playing the orchestrator role. |
 | [lan-docker-inventory](./devops/lan-docker-inventory/SKILL.md) | Use when 要盘点/发布局域网 Docker 全量清单. 只读采集再脱敏发布. |
 | [linux-icmp-hardening](./devops/linux-icmp-hardening/SKILL.md) | Use when 让自有 Linux 主机不被 ping 探测. 只丢 echo-request. |
+| [nas-dns-resolution-stall](./devops/nas-dns-resolution-stall/SKILL.md) | Use when Z4Pro NAS 域名解析超时. 只读定位 resolved 无效 DNS. |
 | [nas-docker-ops](./devops/nas-docker-ops/SKILL.md) | 用户问 Z4Pro NAS (10.0.0.3) Docker 容器状态/日志/重启时使用。 |
 | [oracle-cloud-ops](./devops/oracle-cloud-ops/SKILL.md) | 用户问甲骨文云 OCI/oci/oci2 运维、部署或清退自托管服务时使用。 |
 | [proxy-chain-diagnostics](./devops/proxy-chain-diagnostics/SKILL.md) | 用户问代理/翻墙/节点/DNS 污染/Telegram 连不上时使用，一键诊断 Surge 链路。 |
@@ -88,9 +89,9 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [baoyu-article-illustrator](./creative/baoyu-article-illustrator/SKILL.md) | Article illustrations: type × style × palette consistency. |
 | [baoyu-comic](./creative/baoyu-comic/SKILL.md) | Knowledge comics (知识漫画): educational, biography, tutorial. |
 | [comfyui](./creative/comfyui/SKILL.md) | Generate images, video, and audio via diffusion workflows. |
+| [creative-ideation](./creative/creative-ideation/SKILL.md) | Generate ideas via named methods from creative practice. |
 | [excalidraw](./creative/excalidraw/SKILL.md) | Hand-drawn Excalidraw JSON diagrams (arch, flow, seq). |
 | [html-artifact](./creative/html-artifact/SKILL.md) | Build self-contained HTML files to explain, plan, or review. |
-| [ideation](./creative/creative-ideation/SKILL.md) | Generate project ideas via creative constraints. |
 | [ip-as-logo](./creative/ip-as-logo/SKILL.md) | Use when creating minimalist cute IP character mascot logos. |
 | [pixel-art](./creative/pixel-art/SKILL.md) | Pixel art w/ era palettes (NES, Game Boy, PICO-8). |
 | [pretext](./creative/pretext/SKILL.md) | Build creative browser demos with DOM-free text layout. |
