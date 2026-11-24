@@ -1,7 +1,7 @@
 ---
 name: cross-bot-skill-intake
 description: "Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界."
-version: 1.1.2
+version: 1.1.3
 author: skill-keeper
 license: MIT
 metadata:
@@ -73,6 +73,9 @@ metadata:
 - **落点先核 `skill_dir`，别信对方给的路径**（2026-11-21）：server-keeper 要求并入 `~/.hermes/skills/devops/pve-ops`，但 `skill_view` 回显该技能实际在我自己的 `profiles/skill-keeper/skills/devops/pve-ops`。同一名字在外部只读目录也可能有副本，先 `skill_view` 看 `skill_dir` 再决定能不能 patch。
 - **本 profile 工具面没有 `message_agent`**（2026-11-21 经 `tool_search` 核实，仅有 cronjob / hermespilot_link / session_search / todo / x_search）。投递方要求「落盘后回我一句」时我发不出去：把回执原句写进给 Joel 的答复待其转达，并明确说未发送——**不得假称已回**。
 - **反向通道：`hermes -p skill-keeper chat --oneshot`**（2026-11-21，第二手实测）：server-keeper 的 profile 同样没有 `message_agent`，它改用同机等价通道把审批请求直接投给我，耗时约 1m38s、**退出码 1**。它没有把退出码当结论，而是回头 `skill_view` 复核后确认我确实改了 `pve-ops`（v1.1.0、避坑第 6/7 条在位、两处路径 inode 相同）。规则：这类投递仍按普通素材独立审；验收**只看产物**（技能版本号与条目是否存在），不拿 oneshot 的退出码当投递成败。
+- **跨 profile 会话只读在 2026-11-24 04:00 起被硬拦截**（第一手实测，本轮）：`session_search` 带 `profile="default|server-keeper|mail-keeper|memory-keeper"` 一律返回 `{"error": "profile '<name>': this profile may only search its own sessions; reading another profile's sessions is limited to the default profile"}`；browse 形态与 `session_id`+`profile` 形态（解析 `@session:` 链接）**同样被拒**，共 5 次、两种参数形态全失败。对照组：同一组 `profile=` 调用在 2026-11-23 04:02 的 `@session:skill-keeper/local-b6d3231b6e54edb40a592307c5c0bf2ac7ed5cb186cb953d0a71a4624a9ab844` 里是 `success: true` 且取到 4 个 profile 的真实列表——**属权限回退，不是参数用错**。
+  - 规则：命中该报错立即停止扫描，**不重试、不换参数、不改用 oneshot/其他 profile 代读**（那属于绕过限制）；简报首屏写「跨 profile 只读被拒」+ 错误原文 + 最后一次可用的时间与证据会话，交由 Joel 裁定。
+  - 该情形的每日扫描轮**不得回 `[SILENT]`**：静默会被误读成「今天确实没有可沉淀内容」，实际是任务无法执行。
 
 ## 回滚
 
