@@ -1,7 +1,7 @@
 ---
 name: cross-bot-skill-intake
 description: "Use when 其他 bot 投递经验要求沉淀. 收/审/写三档+边界."
-version: 1.1.4
+version: 1.1.5
 author: skill-keeper
 license: MIT
 metadata:
@@ -73,10 +73,11 @@ metadata:
 - **落点先核 `skill_dir`，别信对方给的路径**（2026-11-21）：server-keeper 要求并入 `~/.hermes/skills/devops/pve-ops`，但 `skill_view` 回显该技能实际在我自己的 `profiles/skill-keeper/skills/devops/pve-ops`。同一名字在外部只读目录也可能有副本，先 `skill_view` 看 `skill_dir` 再决定能不能 patch。
 - **本 profile 工具面没有 `message_agent`**（2026-11-21 经 `tool_search` 核实，仅有 cronjob / hermespilot_link / session_search / todo / x_search）。投递方要求「落盘后回我一句」时我发不出去：把回执原句写进给 Joel 的答复待其转达，并明确说未发送——**不得假称已回**。
 - **反向通道：`hermes -p skill-keeper chat --oneshot`**（2026-11-21，第二手实测）：server-keeper 的 profile 同样没有 `message_agent`，它改用同机等价通道把审批请求直接投给我，耗时约 1m38s、**退出码 1**。它没有把退出码当结论，而是回头 `skill_view` 复核后确认我确实改了 `pve-ops`（v1.1.0、避坑第 6/7 条在位、两处路径 inode 相同）。规则：这类投递仍按普通素材独立审；验收**只看产物**（技能版本号与条目是否存在），不拿 oneshot 的退出码当投递成败。
-- **跨 profile 会话只读自 2026-11-24 04:00 起被硬拦截，连续两日未恢复**（第一手实测；截至 2026-11-25 04:00 复核，四个 profile 仍全部被拒，属稳定状态而非瞬时抖动）：`session_search` 带 `profile="default|server-keeper|mail-keeper|memory-keeper"` 一律返回 `{"error": "profile '<name>': this profile may only search its own sessions; reading another profile's sessions is limited to the default profile"}`；browse 形态与 `session_id`+`profile` 形态（解析 `@session:` 链接）**同样被拒**，共 5 次、两种参数形态全失败。对照组：同一组 `profile=` 调用在 2026-11-23 04:02 的 `@session:skill-keeper/local-b6d3231b6e54edb40a592307c5c0bf2ac7ed5cb186cb953d0a71a4624a9ab844` 里是 `success: true` 且取到 4 个 profile 的真实列表——**属权限回退，不是参数用错**。
+- **跨 profile 会话只读自 2026-11-24 04:00 起被硬拦截**（第一手实测；2026-11-24 / 25 / 26 三次运行复核，四个 profile 均全部被拒，属稳定状态而非瞬时抖动；本条不再逐日改写）：`session_search` 带 `profile="default|server-keeper|mail-keeper|memory-keeper"` 一律返回 `{"error": "profile '<name>': this profile may only search its own sessions; reading another profile's sessions is limited to the default profile"}`；browse 形态与 `session_id`+`profile` 形态（解析 `@session:` 链接）**同样被拒**，共 5 次、两种参数形态全失败。对照组：同一组 `profile=` 调用在 2026-11-23 04:02 的 `@session:skill-keeper/local-b6d3231b6e54edb40a592307c5c0bf2ac7ed5cb186cb953d0a71a4624a9ab844` 里是 `success: true` 且取到 4 个 profile 的真实列表——**属权限回退，不是参数用错**。
   - 规则：命中该报错立即停止扫描，**不重试、不换参数、不改用 oneshot/其他 profile 代读**（那属于绕过限制）；简报首屏写「跨 profile 只读被拒」+ 错误原文 + 最后一次可用的时间与证据会话，交由 Joel 裁定。
   - 该情形的每日扫描轮**不得回 `[SILENT]`**：静默会被误读成「今天确实没有可沉淀内容」，实际是任务无法执行。
   - **先自证工具没坏再报障**：不带 `profile` 的 browse 形态若能返回本 profile 的会话列表（2026-11-25 04:00 返回 5 条自己的 cron 会话），说明 `session_search` 本身可用、只是跨 profile 权限被收——把这条对照证据写进简报，避免 Joel 去查一根没坏的线。
+  - **被拒后仍有可用素材通道：查自己的会话**。别的 bot 用 `hermes -p skill-keeper chat --oneshot` 投递时，素材会落成本 profile 的 oneshot 会话，不带 `profile` 的 `session_search` browse 直接可见（2026-11-26 04:00 实测：最近 10 条全是自己的 cron 轮，最后一条外部投递停在 2026-11-21）。规则：跨 profile 被拒后必补做这一步，简报里把「扫描通道不可用」与「被动投递通道本 24h 无新素材」分开陈述——只报前者会让人误以为没查任何东西，只报后者等于隐瞒任务没执行。
 
 ## 回滚
 

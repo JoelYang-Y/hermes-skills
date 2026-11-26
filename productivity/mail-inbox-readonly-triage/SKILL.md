@@ -1,7 +1,7 @@
 ---
 name: mail-inbox-readonly-triage
 description: "Use when 做邮箱只读巡检/分级推送. 先元数据后正文, 不改已读."
-version: 1.0.0
+version: 1.1.0
 author: skill-keeper
 license: MIT
 metadata:
@@ -64,7 +64,12 @@ metadata:
 9. **上一轮报告已生成但投递中断时，不能只靠「已推送ID」去重**：若上一轮把某封写进清单，但 cron 投递失败（投递目标只收到「Cron failed: interrupted」而无报告正文），严格按清单去重会让这封从未送达的邮件被永久压掉。判据：在投递目标会话按时间点检索，只有失败通知、没有 `[Cron delivery: …]` 正文，即视为未送达；此时允许补投一次并在正文注明「上一轮投递中断，本轮补投」，清单保持不变。
 10. **`subject` 过滤在 Gmail 8099039 上实测不生效**：用完整主题（`Update on AUD Multi-Currency Current Account & Fixed Term Deposits`）查询返回 `total: 0`，同一封用 `from_address=noreply@ifastgb.com` 却能返回。复核已读状态或定位单封时改用 `from_address`（可叠加 `seen`/`since`），否则会把「查不到」误判成「邮件不存在」或「已被移走」。同理，`seen=false` 的有效性也要先用已知未读邮件验证再用。
 11. **累积「已推送ID」清单混用两账号的 UID 空间，数字会撞车**：Gmail 与 QQ 的 `email_id` 各自独立计数，同一数字可在两账号分别指向完全不同的邮件。实测 2026-11-24：清单里的 3199/3200/3204 是 QQ 的会员与收据邮件，而 Gmail 的 3199/3200/3204 是当日全新营销邮件。只按数字比对会把 Gmail 新邮件误判成「已推送」而永久漏报。规程：把清单拆成「Gmail 集合」与「QQ 集合」分别比对（或至少对 Gmail 新邮件同时核对发件人与主题），不要用一个扁平数字集合做跨账号去重。
-12. **`provider_failure: metadata provider request failed` / `mailbox discovery failed` 多为瞬时故障，可下一轮自愈**：2026-11-25 21:25 轮 Gmail 8099039 连续 3 次失败（同时段 QQ 正常），23:00 轮同一工具、同一账号、未改任何配置即恢复读取。判据：仅单账号失败 + 另一账号正常 + 无认证错误字样。处置：该轮如实标注「此账号未巡检」，下轮重试；连续 ≥2 轮仍失败才用 `from_address=` 小范围探测并报告，不要单轮就重启 MCP 或改配置。
+12. **`provider_failure` / `mailbox discovery failed` 多为瞬时故障，可下一轮自愈，但熔断与认证要分开处理**：2026-11-25 21:25 轮 Gmail 连续 3 次失败（同时段 QQ 正常），21:57 下一轮同一工具、同一账号、未改任何配置即恢复（INBOX total 继续正常增长 3203→3208→3209）。判据：**仅单账号失败 + 另一账号正常 + 无认证错误字样**。处置：
+    - 该轮如实标注「此账号未巡检」，**不要升级成运维告警**——首次遇到时曾报「建议重启 MCP 服务」，结果是它自己好了，属误报。
+    - **不要在同一轮反复重试**：连续失败会触发服务器级熔断（`rejected the last 3 calls … Paused for ~Ns`），暂停期内任何调用都被拒，且**重试会让冷却窗口续上**；实测倒计时按墙钟递减（25s→22→17→11→4→1）仍不放行。
+    - **连续 ≥2 轮仍失败**才用 `from_address=` 小范围探测并报告；恢复判据要两条同时成立：`list_emails_metadata` 正常返回条数 **且** `list_available_accounts` 的 `can_receive=true`。
+    - **认证类错误不适用本条**：`authentication failed` / `application-specific password required` 不会自愈，按凭据失效处理，不能等。
+    - 成因参考（不要在故障时改配置，先等一轮）：Gmail 单账号 IMAP 并发上限约 15，同账号多客户端（手机/电脑）叠加每轮新起一个 MCP 进程，容易把连接打满。
 
 ## 安全边界与失败停止
 
