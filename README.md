@@ -2,7 +2,7 @@
 
 Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skills` 同步而来，按分类组织。
 
-- 技能总数：**112**　分类数：**19**
+- 技能总数：**111**　分类数：**18**
 - 每个技能目录：`SKILL.md`（YAML frontmatter `name` / `description`）+ 可选 `references/` `scripts/` `templates/` `assets/`
 - 已排除：`.archive` 归档技能、`.curator_backups` 备份、运行时缓存（`.hub` / `.usage.json` 等）
 - 同步入口：`scripts/sync.sh`（rsync 镜像 + 重建本索引 + 提交推送）
@@ -25,7 +25,6 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | [media](./media/) | 2 | Skills for working with media content — YouTube transcripts, GIF search, music generation, and audio visualization. |
 | [social-media](./social-media/) | 2 | Skills for interacting with social platforms and social-media workflows — posting, reading, monitoring, and account operations. |
 | [apple](./apple/) | 1 | Apple/macOS-specific skills — iMessage, Reminders, Notes, FindMy, and macOS automation. These skills only load on macOS systems. |
-| [consumer-tech](./consumer-tech/) | 1 |  |
 | [data-science](./data-science/) | 1 | Skills for data science workflows — interactive exploration, Jupyter notebooks, data analysis, and visualization. |
 | [leisure](./leisure/) | 1 |  |
 | [red-teaming](./red-teaming/) | 1 |  |
@@ -221,12 +220,6 @@ Hermes Agent 个人技能库（procedural memory），由本机 `~/.hermes/skill
 | 技能 | 描述 |
 |---|---|
 | [apple-platform](./apple/apple-platform/SKILL.md) | Apple platform automation: Notes, Reminders, iMessage, FindMy, and macOS desktop computer use. Covers all native macOS/iOS app interactions via CLI tools and AppleScript. |
-
-## consumer-tech
-
-| 技能 | 描述 |
-|---|---|
-| [hardware-buying-advisory](./consumer-tech/hardware-buying-advisory/SKILL.md) | 用户问某硬件/配件/穿戴设备怎么样、值不值得买时用：先核实当前在用型号，再按官网核价核规格，最后给结构化结论与明确取舍。 |
 
 ## data-science
 
